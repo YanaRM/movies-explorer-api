@@ -4,35 +4,30 @@ const mongoose = require('mongoose');
 const helmet = require('helmet');
 const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
-const { createNewUser, login } = require('./controllers/users');
+const cookieParser = require('cookie-parser');
 
-const { PORT = 3000, MONGO_URL = 'mongodb://127.0.0.1:27017/bitfilmsdb' } = process.env;
+const { PORT = 3000, MONGO_URL, NODE_ENV } = process.env;
+const router = require('./routes/index');
+const limiter = require('./middlewares/limiter');
 const corsHandler = require('./middlewares/cors');
 const errorHandler = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
-const NotFound = require('./errors/NotFound');
-const { createNewUserValidation, loginValidation } = require('./middlewares/validation');
 
 const app = express();
 
-mongoose.connect(MONGO_URL);
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://127.0.0.1:27017/bitfilmsdb');
 
 app.use(helmet());
 app.use(corsHandler);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(limiter);
 
 app.use(requestLogger);
 
-app.post('/signup', createNewUserValidation, createNewUser);
-app.post('/signin', loginValidation, login);
-app.use(require('./routes/users'));
-app.use(require('./routes/movies'));
-
-app.use('*', (req, res, next) => {
-  next(new NotFound('Страница не найдена'));
-});
+app.use(router);
 
 app.use(errorLogger);
 

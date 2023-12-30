@@ -65,7 +65,16 @@ module.exports.login = (req, res, next) => {
             { expiresIn: '7d' },
           );
 
-          return res.send({ token });
+          return res
+            .cookie('jwt', token, {
+              maxAge: 3600000,
+              httpOnly: true,
+            })
+            .send({
+              _id: user._id,
+              name: user.name,
+              email: user.email,
+            });
         });
     })
     .catch(next);
@@ -100,4 +109,11 @@ module.exports.updateUserInfo = (req, res, next) => {
 
       next(err);
     });
+};
+
+module.exports.logout = (req, res, next) => {
+  res.clearCookie('jwt');
+  res.send({ message: 'Вызод из профиля выполнен успешно' });
+
+  next();
 };
