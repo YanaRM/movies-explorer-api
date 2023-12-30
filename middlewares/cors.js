@@ -1,8 +1,8 @@
 const allowedCors = [
-  'http://movies-explorer-yanam.nomoredomainsmonster.ru',
-  'https://movies-explorer-yanam.nomoredomainsmonster.ru',
-  'http://api.movies-explorer-yanam.nomoredomainsmonster.ru',
-  'https://api.movies-explorer-yanam.nomoredomainsmonster.ru',
+  'http://yanarm.nomoredomainsmonster.ru',
+  'https://yanarm.nomoredomainsmonster.ru',
+  'http://api.yanarm.nomoredomainsmonster.ru',
+  'https://api.yanarm.nomoredomainsmonster.ru',
   'http://localhost:3000',
 ];
 
