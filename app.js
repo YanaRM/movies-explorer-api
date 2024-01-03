@@ -6,7 +6,12 @@ const { errors } = require('celebrate');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
-const { PORT = 3000, MONGO_URL, NODE_ENV } = process.env;
+const {
+  PORT,
+  MONGO_URL,
+  NODE_ENV,
+  MONGO_URL_DEV,
+} = require('./utils/processEnvConfig');
 const router = require('./routes/index');
 const limiter = require('./middlewares/limiter');
 const corsHandler = require('./middlewares/cors');
@@ -15,7 +20,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 
-mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : 'mongodb://127.0.0.1:27017/bitfilmsdb');
+mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV);
 
 app.use(helmet());
 app.use(corsHandler);

@@ -1,8 +1,16 @@
 const Movie = require('../models/movie');
-const { CREATED } = require('../responseStatusCodes');
-const { IncorrectData } = require('../errors/IncorrectData');
-const { NotFound } = require('../errors/NotFound');
-const { AccessDenied } = require('../errors/AccessDenied');
+const { CREATED } = require('../utils/responseStatusCodes');
+const { BadRequestError } = require('../errors/BadRequestError');
+const { NotFoundError } = require('../errors/NotFoundError');
+const { ForbiddenError } = require('../errors/ForbiddenError');
+
+const {
+  wrongData,
+  movieNotFound,
+  deletingMoviesForbidden,
+  movieDeleted,
+  validationError,
+} = require('../utils/responseStatusMessages');
 
 module.exports.getSavedMovies = (req, res, next) => {
   Movie.find({ owner: req.user._id })
@@ -41,8 +49,8 @@ module.exports.createMovie = (req, res, next) => {
   })
     .then((movie) => res.status(CREATED).send(movie))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Неправильно введены данные'));
+      if (err.name === validationError) {
+        next(new BadRequestError(wrongData));
 
         return;
       }
@@ -57,15 +65,15 @@ module.exports.deleteMovie = (req, res, next) => {
   Movie.findById(_id)
     .then((movie) => {
       if (!movie) {
-        throw new NotFound('Фильм не найден');
+        throw new NotFoundError(movieNotFound);
       }
 
       if (JSON.stringify(movie.owner) !== JSON.stringify(req.user._id)) {
-        throw new AccessDenied('Вы не можете удалять чужие фильмы');
+        throw new ForbiddenError(deletingMoviesForbidden);
       }
 
       return Movie.deleteOne(movie);
     })
-    .then(() => res.send({ message: 'Фильм удалён' }))
+    .then(() => res.send({ message: movieDeleted }))
     .catch(next);
 };

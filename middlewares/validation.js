@@ -31,14 +31,14 @@ module.exports.createMovieValidation = celebrate({
     director: Joi.string().required(),
     description: Joi.string().required(),
     duration: Joi.number().required(),
-    image: Joi.string().required().uri(),
-    trailerLink: Joi.string().required().uri(),
-    thumbnail: Joi.string().required().uri(),
+    image: Joi.string().required().pattern(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*/),
+    trailerLink: Joi.string().required().pattern(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*/),
+    thumbnail: Joi.string().required().pattern(/^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*/),
   }),
 });
 
 module.exports.movieIdValidation = celebrate({
   params: Joi.object().keys({
-    _id: Joi.string().alphanum().length(24),
+    _id: Joi.string().hex().required().length(24),
   }),
 });

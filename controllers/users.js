@@ -1,16 +1,25 @@
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const { NODE_ENV, JWT_SECRET } = process.env;
+const { NODE_ENV, JWT_SECRET } = require('../utils/processEnvConfig');
 
 const saltRounds = 10;
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { CREATED, MONGO_DUPLICATE_ERROR_CODE } = require('../responseStatusCodes');
-const ExistingEmail = require('../errors/ExistingEmail');
-const IncorrectData = require('../errors/IncorrectData');
-const NotAuthenticate = require('../errors/NotAuthenticate');
+const { CREATED, MONGO_DUPLICATE_ERROR_CODE } = require('../utils/responseStatusCodes');
+const ConflictError = require('../errors/ConflictError');
+const BadRequestError = require('../errors/BadRequestError');
+const UnauthorizedError = require('../errors/UnauthorizedError');
+
+const {
+  userAlreadyExists,
+  userNotFound,
+  wrongData,
+  wrongEmailOrPassword,
+  successfulLogout,
+  validationError,
+} = require('../utils/responseStatusMessages');
 
 module.exports.createNewUser = (req, res, next) => {
   const { name, email, password } = req.body;
@@ -29,13 +38,13 @@ module.exports.createNewUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-        next(new ExistingEmail('Такой пользователь уже существует'));
+        next(new ConflictError(userAlreadyExists));
 
         return;
       }
 
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Неправильно введены данные'));
+      if (err.name === validationError) {
+        next(new BadRequestError(wrongData));
 
         return;
       }
@@ -50,13 +59,13 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new NotAuthenticate('Неправильные почта или пароль'));
+        return Promise.reject(new UnauthorizedError(wrongEmailOrPassword));
       }
 
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            return Promise.reject(new NotAuthenticate('Неправильные почта или пароль'));
+            return Promise.reject(new UnauthorizedError(wrongEmailOrPassword));
           }
 
           const token = jwt.sign(
@@ -83,6 +92,10 @@ module.exports.login = (req, res, next) => {
 module.exports.getUserInfo = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
+      if (!user) {
+        return Promise.reject(new BadRequestError(userNotFound));
+      }
+
       res.send(user);
     })
     .catch(next);
@@ -101,8 +114,14 @@ module.exports.updateUserInfo = (req, res, next) => {
   )
     .then((user) => res.send(user))
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new IncorrectData('Неправильно введены данные'));
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+        next(new ConflictError(userAlreadyExists));
+
+        return;
+      }
+
+      if (err.name === validationError) {
+        next(new BadRequestError(wrongData));
 
         return;
       }
@@ -113,7 +132,7 @@ module.exports.updateUserInfo = (req, res, next) => {
 
 module.exports.logout = (req, res, next) => {
   res.clearCookie('jwt');
-  res.send({ message: 'Вызод из профиля выполнен успешно' });
+  res.send({ message: successfulLogout });
 
   next();
 };
