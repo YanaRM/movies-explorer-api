@@ -4,7 +4,7 @@ const { NODE_ENV, JWT_SECRET } = process.env;
 
 const UnauthorizedError = require('../errors/UnauthorizedError');
 
-const authorizationRequired = require('../utils/responseStatusMessages');
+const { authorizationRequired } = require('../utils/responseStatusMessages');
 
 module.exports = (req, res, next) => {
   const token = req.cookies.jwt;
