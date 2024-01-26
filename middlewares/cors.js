@@ -22,6 +22,8 @@ const corsHandler = (req, res, next) => {
 
     res.header('Access-Control-Allow-Headers', requestHeaders);
 
+    res.header('SameSite', 'none');
+
     return res.end();
   }
 
