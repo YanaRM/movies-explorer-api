@@ -23,7 +23,7 @@ const app = express();
 mongoose.connect(NODE_ENV === 'production' ? MONGO_URL : MONGO_URL_DEV);
 
 app.use(helmet());
-app.use(corsHandler);
+app.use(corsHandler({ sameSite: 'none' }));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
