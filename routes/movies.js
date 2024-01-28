@@ -5,7 +5,7 @@ const { createMovieValidation, movieIdValidation } = require('../middlewares/val
 
 movieRouter.get('/', auth, getSavedMovies);
 
-movieRouter.post('/', auth, createMovie);
+movieRouter.post('/', auth, createMovieValidation, createMovie);
 
 movieRouter.delete('/:_id', auth, movieIdValidation, deleteMovie);
 
