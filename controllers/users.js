@@ -133,7 +133,11 @@ module.exports.updateUserInfo = (req, res, next) => {
 };
 
 module.exports.logout = (req, res, next) => {
-  res.clearCookie('jwt');
+  res.clearCookie('jwt', {
+    httpOnly: true,
+    sameSite: 'none',
+    secure: true,
+  });
   res.send({ message: successfulLogout });
   res.end();
 
