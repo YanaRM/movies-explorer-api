@@ -135,6 +135,7 @@ module.exports.updateUserInfo = (req, res, next) => {
 module.exports.logout = (req, res, next) => {
   res.clearCookie('jwt');
   res.send({ message: successfulLogout });
+  res.end();
 
   next();
 };
