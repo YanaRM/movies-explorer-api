@@ -12,7 +12,7 @@ const movieNotFound = 'Фильм не найден';
 
 const deletingMoviesForbidden = 'Вы не можете удалять чужие фильмы';
 
-const movieDeleted = 'Вы не можете удалять чужие фильмы';
+const movieDeleted = 'Фильм успешно удалён';
 
 const authorizationRequired = 'Необходима авторизация';
 
