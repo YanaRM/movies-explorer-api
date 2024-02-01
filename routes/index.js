@@ -12,7 +12,7 @@ const { pageNotFound } = require('../utils/responseStatusMessages');
 
 router.post('/signup', createNewUserValidation, createNewUser);
 router.post('/signin', loginValidation, login);
-router.get('/signout', auth, logout);
+router.post('/signout', auth, logout);
 
 router.use('/users', userRouter);
 router.use('/movies', movieRouter);
